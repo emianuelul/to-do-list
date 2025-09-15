@@ -1,0 +1,47 @@
+#content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+button,
+input[type='checkbox'] {
+  cursor: pointer;
+}
+
+.todos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  gap: 16px;
+}
+
+.todo > input {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.todo > label {
+  font-size: 1.5rem;
+}
+
+.todoform {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+}
