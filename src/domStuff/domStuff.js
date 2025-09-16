@@ -9,7 +9,6 @@ class ToDoItem {
 
   toggleCheck() {
     const label = this.node.children[1];
-
     this.check = !this.check;
 
     if (this.check === true) label.classList.add('strikethrough');
@@ -18,6 +17,14 @@ class ToDoItem {
 
   toggleFavorite() {
     this.favorite = !this.favorite;
+  }
+
+  isChecked() {
+    return this.check === true;
+  }
+
+  isFavorite() {
+    return this.favorite === true;
   }
 }
 

@@ -6,6 +6,8 @@ import { DomStuff } from './domStuff/domStuff.js';
 const processor = (function () {
   let toDoItems = [];
   let favorites = [];
+  let completed = [];
+  let uncompleted = [];
 
   const content = document.querySelector('#content');
 
@@ -31,29 +33,46 @@ const processor = (function () {
 
         const toDoObj = DomStuff.createToDoItem(form);
         const favoriteBtn = toDoObj.todo.children[2];
+        const todoItem = toDoObj.item;
         div.removeChild(form);
 
         div.insertBefore(toDoObj.todo, btn);
 
-        toDoObj.todo.addEventListener('mouseenter', () => {
-          favoriteBtn.classList.add('visible');
-        });
-        toDoObj.todo.addEventListener('mouseleave', () => {
-          favoriteBtn.classList.remove('visible');
-        });
         toDoObj.todo.addEventListener('click', (event) => {
           if (event.target.classList.contains('todoCheck')) {
-            toDoObj.item.toggleCheck();
+            todoItem.toggleCheck();
+            if (todoItem.isChecked()) {
+              completed.push(todoItem);
+              uncompleted = uncompleted.filter((item) => item !== todoItem);
+            } else {
+              completed = completed.filter((item) => item !== todoItem);
+              uncompleted.push(todoItem);
+            }
           } else if (event.target.classList.contains('todoFavorite')) {
-            toDoObj.item.toggleFavorite();
+            todoItem.toggleFavorite();
+            if (todoItem.isFavorite()) {
+              favorites.push(todoItem);
+              favoriteBtn.classList.add('visible');
+            } else {
+              favorites = favorites.filter((item) => item !== todoItem);
+              favoriteBtn.classList.remove('visible');
+            }
           }
         });
+
+        uncompleted.push(todoItem);
+        toDoItems.push(todoItem);
       });
     });
 
     div.appendChild(h1);
     div.appendChild(btn);
     content.appendChild(div);
+  };
+
+  const logArrays = () => {
+    console.log({ favorites });
+    console.log({ toDoItems });
   };
 
   initPage();
