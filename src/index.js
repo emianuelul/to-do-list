@@ -28,7 +28,11 @@ const processor = (function () {
       form.addEventListener('submit', (event) => {
         event.preventDefault();
 
-        const toDoObj = DomStuff.createToDoItem(form);
+        const data = new FormData(form);
+        const formText = data.get('textInput');
+        const formDate = data.get('dateInput');
+
+        const toDoObj = DomStuff.createToDoItem(formText, formDate);
         const favoriteBtn = toDoObj.todo.querySelector('.todoFavorite');
         const deleteBtn = toDoObj.todo.querySelector('.todoDelete');
         const todoDOM = toDoObj.todo;
@@ -68,8 +72,6 @@ const processor = (function () {
             Object.keys(basics).forEach((key) => {
               basics[key] = basics[key].filter((item) => item !== todoItem);
             });
-
-            console.log(basics);
           }
         });
 
@@ -80,6 +82,7 @@ const processor = (function () {
 
     div.appendChild(h1);
     div.appendChild(btn);
+
     content.appendChild(div);
   };
 

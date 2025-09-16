@@ -105,11 +105,7 @@ export class DomStuff {
     return form;
   }
 
-  static createToDoItem(form) {
-    const data = new FormData(form);
-    const text = data.get('textInput');
-    const date = data.get('dateInput');
-
+  static createToDoItem(text, date) {
     const todo = DomStuff.makeDiv('.todo');
 
     const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
