@@ -51,11 +51,13 @@ input[type='checkbox'] {
   gap: 16px;
 }
 
-.todoFavorite {
+.todoFavorite,
+.todoDelete {
   opacity: 0;
 }
 
-.todo:hover > .todoFavorite {
+.todo:hover > .todoFavorite,
+.todo:hover > .todoDelete {
   opacity: 1;
 }
 

@@ -8,7 +8,7 @@ class ToDoItem {
   }
 
   toggleCheck() {
-    const label = this.node.children[1];
+    const label = this.node.querySelector('.todoLabel');
     this.check = !this.check;
 
     if (this.check === true) label.classList.add('strikethrough');
@@ -111,17 +111,26 @@ export class DomStuff {
     const date = data.get('dateInput');
 
     const todo = DomStuff.makeDiv('.todo');
+
     const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
     checkBox.classList.add('todoCheck');
+
     const label = DomStuff.makeLabel(`${DomStuff.#labels}`, text);
     label.classList.add('todoLabel');
+
+    const dateLabel = DomStuff.makeLabel(`${DomStuff.#labels}`, date);
+    dateLabel.classList.add('todoDate');
     DomStuff.#labels++;
+
     const favoriteBtn = DomStuff.makeButton('⭐');
     favoriteBtn.classList.add('todoFavorite');
 
+    const deleteBtn = DomStuff.makeButton('🗑️');
+    deleteBtn.classList.add('todoDelete');
+
     const item = new ToDoItem(todo, text, date, checkBox.checked, false);
 
-    todo.append(checkBox, label, favoriteBtn);
+    todo.append(checkBox, label, dateLabel, favoriteBtn, deleteBtn);
 
     return {
       todo,

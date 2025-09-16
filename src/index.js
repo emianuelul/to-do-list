@@ -4,10 +4,7 @@ import './basicStyles.css';
 import { DomStuff } from './domStuff/domStuff.js';
 
 const processor = (function () {
-  let toDoItems = [];
-  let favorites = [];
-  let completed = [];
-  let uncompleted = [];
+  let basics = { todoAll: [], favorites: [], completed: [], uncompleted: [] };
 
   const content = document.querySelector('#content');
 
@@ -32,47 +29,58 @@ const processor = (function () {
         event.preventDefault();
 
         const toDoObj = DomStuff.createToDoItem(form);
-        const favoriteBtn = toDoObj.todo.children[2];
+        const favoriteBtn = toDoObj.todo.querySelector('.todoFavorite');
+        const deleteBtn = toDoObj.todo.querySelector('.todoDelete');
+        const todoDOM = toDoObj.todo;
         const todoItem = toDoObj.item;
+
         div.removeChild(form);
+        div.insertBefore(todoDOM, btn);
 
-        div.insertBefore(toDoObj.todo, btn);
-
-        toDoObj.todo.addEventListener('click', (event) => {
+        todoDOM.addEventListener('click', (event) => {
           if (event.target.classList.contains('todoCheck')) {
             todoItem.toggleCheck();
             if (todoItem.isChecked()) {
-              completed.push(todoItem);
-              uncompleted = uncompleted.filter((item) => item !== todoItem);
+              basics.completed.push(todoItem);
+              basics.uncompleted = basics.uncompleted.filter(
+                (item) => item !== todoItem
+              );
             } else {
-              completed = completed.filter((item) => item !== todoItem);
-              uncompleted.push(todoItem);
+              basics.completed = basics.completed.filter(
+                (item) => item !== todoItem
+              );
+              basics.uncompleted.push(todoItem);
             }
           } else if (event.target.classList.contains('todoFavorite')) {
             todoItem.toggleFavorite();
             if (todoItem.isFavorite()) {
-              favorites.push(todoItem);
+              basics.favorites.push(todoItem);
               favoriteBtn.classList.add('visible');
             } else {
-              favorites = favorites.filter((item) => item !== todoItem);
+              basics.favorites = basics.favorites.filter(
+                (item) => item !== todoItem
+              );
               favoriteBtn.classList.remove('visible');
             }
+          } else if (event.target.classList.contains('todoDelete')) {
+            div.removeChild(todoDOM);
+
+            Object.keys(basics).forEach((key) => {
+              basics[key] = basics[key].filter((item) => item !== todoItem);
+            });
+
+            console.log(basics);
           }
         });
 
-        uncompleted.push(todoItem);
-        toDoItems.push(todoItem);
+        basics.uncompleted.push(todoItem);
+        basics.todoAll.push(todoItem);
       });
     });
 
     div.appendChild(h1);
     div.appendChild(btn);
     content.appendChild(div);
-  };
-
-  const logArrays = () => {
-    console.log({ favorites });
-    console.log({ toDoItems });
   };
 
   initPage();
