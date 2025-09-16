@@ -1,0 +1,124 @@
+class ToDoItem {
+  constructor(node, text, date, check, favorite) {
+    this.node = node;
+    this.text = text;
+    this.date = date;
+    this.check = check;
+    this.favorite = favorite;
+  }
+
+  toggleCheck() {
+    const label = this.node.children[1];
+
+    this.check = !this.check;
+
+    if (this.check === true) label.classList.add('strikethrough');
+    else label.classList.remove('strikethrough');
+  }
+
+  toggleFavorite() {
+    this.favorite = !this.favorite;
+  }
+}
+
+export class DomStuff {
+  static #labels = 1;
+
+  static makeDiv(text) {
+    const div = document.createElement('div');
+    if (text[0] === '#') {
+      div.id = text.slice(1);
+    } else {
+      div.classList.add(text.slice(1));
+    }
+    return div;
+  }
+
+  static makeButton(text) {
+    const btn = document.createElement('button');
+    btn.textContent = text;
+    btn.type = 'button';
+    return btn;
+  }
+
+  static makeLabel(forValue, text) {
+    const label = document.createElement('label');
+    label.setAttribute('for', forValue);
+    label.textContent = text;
+    return label;
+  }
+
+  static makeCheckbox(id) {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = id;
+    return input;
+  }
+
+  static makeInput(type, required) {
+    const input = document.createElement('input');
+    input.type = type;
+    if (required) input.setAttribute('required', '');
+    return input;
+  }
+
+  static makeH(type, text) {
+    const h = document.createElement(`h${type}`);
+    h.textContent = text;
+
+    return h;
+  }
+
+  static makeP(text) {
+    const p = document.createElement('p');
+    p.textContent = text;
+
+    return p;
+  }
+
+  static createToDoForm() {
+    const form = document.createElement('form');
+    form.classList.add('todoform');
+
+    const textInput = DomStuff.makeInput('text', true);
+    textInput.name = 'textInput';
+
+    const dateInput = DomStuff.makeInput('date', true);
+    dateInput.name = 'dateInput';
+
+    const submitButton = DomStuff.makeButton('Submit');
+    submitButton.type = 'submit';
+
+    const cancelButton = DomStuff.makeButton('x');
+    cancelButton.classList.add('cancelBtn');
+    cancelButton.type = 'button';
+
+    form.append(cancelButton, textInput, dateInput, submitButton);
+
+    return form;
+  }
+
+  static createToDoItem(form) {
+    const data = new FormData(form);
+    const text = data.get('textInput');
+    const date = data.get('dateInput');
+
+    const todo = DomStuff.makeDiv('.todo');
+    const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
+    checkBox.classList.add('todoCheck');
+    const label = DomStuff.makeLabel(`${DomStuff.#labels}`, text);
+    label.classList.add('todoLabel');
+    DomStuff.#labels++;
+    const favoriteBtn = DomStuff.makeButton('⭐');
+    favoriteBtn.classList.add('todoFavorite');
+
+    const item = new ToDoItem(todo, text, date, checkBox.checked, false);
+
+    todo.append(checkBox, label, favoriteBtn);
+
+    return {
+      todo,
+      item,
+    };
+  }
+}
