@@ -4,24 +4,30 @@ import './sidebar/sidebar.css';
 
 import { DomStuff } from './domStuff/domStuff.js';
 import { SidebarCategory } from './sidebar/sidebar.js';
+import { differenceInCalendarDays } from 'date-fns';
 
 /*
   TO DO:
   1. Make app have persistent storage
+  2. Make add button more modular (don't create a different button each time you change pages, keep the button through a refference and just move it around)
  */
 
 const processor = (function () {
-  let basics = { todoAll: [], favorites: [], completed: [], uncompleted: [] };
+  let basics = {
+    todoAll: [],
+    favorites: [],
+    completed: [],
+    uncompleted: [],
+    dueTmrw: [],
+  };
 
-  const content = document.querySelector('#content');
-
-  const sideBar = DomStuff.makeDiv('#sidebar');
-  content.appendChild(sideBar);
-
-  const todos = DomStuff.makeDiv('.todos');
-  content.appendChild(todos);
-
-  let categories = {
+  let basicCategories = {
+    dueTmrwCategory: new SidebarCategory(
+      'duetmrw',
+      'Due Tomorrow',
+      basics.dueTmrw,
+      false
+    ),
     allTodosCategory: new SidebarCategory(
       'alltodos',
       "All <span class='nowrap'>To-Do's</span>",
@@ -48,10 +54,72 @@ const processor = (function () {
     ),
   };
 
+  const currentDay = new Date();
+
+  const content = document.querySelector('#content');
+
+  const sideBar = DomStuff.makeDiv('#sidebar');
+  content.appendChild(sideBar);
+
+  const todos = DomStuff.makeDiv('.todos');
+  content.appendChild(todos);
+
+  const createAddToDoBtn = () => {
+    const btn = DomStuff.makeButton('+');
+    btn.classList.add('addToDo');
+    btn.addEventListener('click', (event) => {
+      const form = DomStuff.createToDoForm();
+
+      todos.insertBefore(form, btn);
+
+      form.addEventListener('click', (event) => {
+        if (event.target.classList.contains('cancelBtn')) {
+          todos.removeChild(form);
+        }
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const data = new FormData(form);
+        const formText = data.get('textInput');
+        const formDate = data.get('dateInput');
+
+        const toDoObj = DomStuff.createToDoItem(formText, formDate);
+
+        if (currentPage.getName() === 'favorites') {
+          toDoObj.item.toggleFavorite();
+          toDoObj.todo.querySelector('.todoFavorite').classList.add('visible');
+          basics.favorites.push(toDoObj.item);
+        }
+        checkDueTmrw(toDoObj.item);
+
+        todos.removeChild(form);
+        todos.insertBefore(toDoObj.todo, btn);
+
+        toDoObj.todo.addEventListener('click', (event) =>
+          todoBtnClickEvents(event, toDoObj)
+        );
+
+        basics.uncompleted.push(toDoObj.item);
+        basics.todoAll.push(toDoObj.item);
+      });
+    });
+    todos.appendChild(btn);
+
+    return btn;
+  };
+
+  const checkDueTmrw = (item) => {
+    if (differenceInCalendarDays(item.getDate(), currentDay) === 1) {
+      basics.dueTmrw.push(item);
+      console.log('ok');
+    }
+  };
+
   const createToDos = (array) => {
     array.forEach((item) => {
       const object = item.getNode();
-
       if (document.querySelector('.addToDo') !== undefined)
         todos.insertBefore(item.getNode(), document.querySelector('.addToDo'));
       else todos.appendChild(item.getNode());
@@ -125,6 +193,7 @@ const processor = (function () {
   };
 
   let currentPage = null;
+  const addBtn = createAddToDoBtn();
   const changePage = (page) => {
     currentPage = page;
 
@@ -135,45 +204,14 @@ const processor = (function () {
     todos.appendChild(h1);
 
     if (page.getCanAdd()) {
-      const btn = DomStuff.makeButton('+');
-      btn.classList.add('addToDo');
-      btn.addEventListener('click', (event) => {
-        const form = DomStuff.createToDoForm();
-
-        todos.insertBefore(form, btn);
-
-        form.addEventListener('click', (event) => {
-          if (event.target.classList.contains('cancelBtn')) {
-            todos.removeChild(form);
-          }
-        });
-
-        form.addEventListener('submit', (event) => {
-          event.preventDefault();
-
-          const data = new FormData(form);
-          const formText = data.get('textInput');
-          const formDate = data.get('dateInput');
-
-          const toDoObj = DomStuff.createToDoItem(formText, formDate);
-
-          todos.removeChild(form);
-          todos.insertBefore(toDoObj.todo, btn);
-
-          toDoObj.todo.addEventListener('click', (event) =>
-            todoBtnClickEvents(event, toDoObj)
-          );
-
-          basics.uncompleted.push(toDoObj.item);
-          basics.todoAll.push(toDoObj.item);
-        });
-      });
-      todos.appendChild(btn);
+      todos.appendChild(addBtn);
     }
     createToDos(page.getContents());
   };
 
   const initSideBar = () => {
+    currentPage.getButton().classList.add('clicked');
+
     const basicsDiv = DomStuff.makeDiv('#basics');
     basicsDiv.classList.add('sidebarSection');
     sideBar.appendChild(basicsDiv);
@@ -182,24 +220,19 @@ const processor = (function () {
     userProjects.classList.add('sidebarSection');
     sideBar.appendChild(userProjects);
 
-    categories.allTodosCategory.getButton().classList.add('clicked');
-
-    basicsDiv.append(
-      categories.allTodosCategory.getButton(),
-      categories.favoritesCategory.getButton(),
-      categories.completedCategory.getButton(),
-      categories.uncompletedCategory.getButton()
-    );
+    Object.values(basicCategories).forEach((item) => {
+      basicsDiv.appendChild(item.getButton());
+    });
 
     sideBar.addEventListener('click', (event) => {
       const btn = event.target.closest('button.categoryButton');
       if (!btn) return;
 
-      for (const key in categories) {
-        categories[key].getButton().classList.remove('clicked');
+      for (const key in basicCategories) {
+        basicCategories[key].getButton().classList.remove('clicked');
       }
       const name = btn.getAttribute('buttonName');
-      const clickedCategory = Object.values(categories).find(
+      const clickedCategory = Object.values(basicCategories).find(
         (c) => c.getName() === name
       );
 
@@ -211,10 +244,10 @@ const processor = (function () {
     });
   };
 
-  const initToDos = () => {
-    changePage(categories.allTodosCategory);
+  const startApp = () => {
+    changePage(basicCategories.dueTmrwCategory);
   };
 
-  initToDos();
+  startApp();
   initSideBar();
 })();
