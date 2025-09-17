@@ -1,0 +1,33 @@
+#sidebar {
+  display: flex;
+  flex-direction: column;
+
+  border: 3px solid black;
+  border-radius: 12px;
+
+  flex: 1;
+  min-height: 100%;
+
+  padding: 1em;
+  margin: 1em;
+}
+
+.nowrap {
+  text-wrap-mode: nowrap;
+}
+
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+
+  gap: 1em;
+
+  padding: 2em 0;
+}
+
+.categoryTitle {
+  font-size: 1.75rem;
+  width: 100%;
+}

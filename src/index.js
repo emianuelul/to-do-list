@@ -1,27 +1,82 @@
 import './cssReset.css';
 import './basicStyles.css';
+import './sidebar/sidebar.css';
 
 import { DomStuff } from './domStuff/domStuff.js';
+import { SidebarCategory } from './sidebar/sidebar.js';
 
 const processor = (function () {
   let basics = { todoAll: [], favorites: [], completed: [], uncompleted: [] };
 
   const content = document.querySelector('#content');
 
+  const sideBar = DomStuff.makeDiv('#sidebar');
+  content.appendChild(sideBar);
+
+  const todos = DomStuff.makeDiv('.todos');
+  content.appendChild(todos);
+
+  const changePage = () => {};
+
+  const initSideBar = () => {
+    const basicsDiv = DomStuff.makeDiv('#basics');
+    basicsDiv.classList.add('sidebarSection');
+    sideBar.appendChild(basicsDiv);
+
+    const userProjects = DomStuff.makeDiv('#userProjects');
+    userProjects.classList.add('sidebarSection');
+    sideBar.appendChild(userProjects);
+
+    const allTodosCategory = new SidebarCategory(
+      'all-to-dos',
+      "All <span class='nowrap'>To-Do's<span>",
+      false,
+      basics.todoAll
+    );
+
+    const favoritesCategory = new SidebarCategory(
+      'favorites',
+      'Favorites',
+      true,
+      basics.favorites
+    );
+
+    const completedCategory = new SidebarCategory(
+      'completed',
+      "Completed <span class='nowrap'>To-Do's<span>",
+      false,
+      basics.completed
+    );
+
+    const uncompletedCategory = new SidebarCategory(
+      'uncompleted',
+      "Uncompleted <span class='nowrap'>To-Do's<span>",
+      false,
+      basics.uncompleted
+    );
+
+    basicsDiv.append(
+      allTodosCategory.getNode(),
+      favoritesCategory.getNode(),
+      completedCategory.getNode(),
+      uncompletedCategory.getNode()
+    );
+  };
+
   const initPage = () => {
-    const div = DomStuff.makeDiv('.todos');
     const btn = DomStuff.makeButton('+');
-    const h1 = DomStuff.makeH(1, 'Title');
+    const h1 = DomStuff.makeH(1, "All To-Do's");
+    h1.classList.add('sectionTitle');
     btn.classList.add('addToDo');
 
     btn.addEventListener('click', (event) => {
       const form = DomStuff.createToDoForm();
 
-      div.insertBefore(form, btn);
+      todos.insertBefore(form, btn);
 
       form.addEventListener('click', (event) => {
         if (event.target.classList.contains('cancelBtn')) {
-          div.removeChild(form);
+          todos.removeChild(form);
         }
       });
 
@@ -38,8 +93,8 @@ const processor = (function () {
         const todoDOM = toDoObj.todo;
         const todoItem = toDoObj.item;
 
-        div.removeChild(form);
-        div.insertBefore(todoDOM, btn);
+        todos.removeChild(form);
+        todos.insertBefore(todoDOM, btn);
 
         todoDOM.addEventListener('click', (event) => {
           if (event.target.classList.contains('todoCheck')) {
@@ -67,7 +122,7 @@ const processor = (function () {
               favoriteBtn.classList.remove('visible');
             }
           } else if (event.target.classList.contains('todoDelete')) {
-            div.removeChild(todoDOM);
+            todos.removeChild(todoDOM);
 
             Object.keys(basics).forEach((key) => {
               basics[key] = basics[key].filter((item) => item !== todoItem);
@@ -80,11 +135,10 @@ const processor = (function () {
       });
     });
 
-    div.appendChild(h1);
-    div.appendChild(btn);
-
-    content.appendChild(div);
+    todos.appendChild(h1);
+    todos.appendChild(btn);
   };
 
   initPage();
+  initSideBar();
 })();

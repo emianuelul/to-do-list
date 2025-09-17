@@ -35,15 +35,17 @@ export class DomStuff {
     const div = document.createElement('div');
     if (text[0] === '#') {
       div.id = text.slice(1);
-    } else {
+    } else if (text[0] === '.') {
       div.classList.add(text.slice(1));
+    } else {
+      console.error('first character is not a class / id identifier');
     }
     return div;
   }
 
   static makeButton(text) {
     const btn = document.createElement('button');
-    btn.textContent = text;
+    btn.innerHTML = text;
     btn.type = 'button';
     return btn;
   }
