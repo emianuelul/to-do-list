@@ -7,6 +7,18 @@ class ToDoItem {
     this.favorite = favorite;
   }
 
+  getText() {
+    return this.text;
+  }
+
+  getDate() {
+    return this.date;
+  }
+
+  getNode() {
+    return this.node;
+  }
+
   toggleCheck() {
     const label = this.node.querySelector('.todoLabel');
     this.check = !this.check;
@@ -31,14 +43,14 @@ class ToDoItem {
 export class DomStuff {
   static #labels = 1;
 
-  static makeDiv(text) {
+  static makeDiv(selector) {
     const div = document.createElement('div');
-    if (text[0] === '#') {
-      div.id = text.slice(1);
-    } else if (text[0] === '.') {
-      div.classList.add(text.slice(1));
+    if (selector[0] === '#') {
+      div.id = selector.slice(1);
+    } else if (selector[0] === '.') {
+      div.classList.add(selector.slice(1));
     } else {
-      console.error('first character is not a class / id identifier');
+      console.error('first character is not a class / id selector');
     }
     return div;
   }
@@ -73,7 +85,7 @@ export class DomStuff {
 
   static makeH(type, text) {
     const h = document.createElement(`h${type}`);
-    h.textContent = text;
+    h.innerHTML = text;
 
     return h;
   }

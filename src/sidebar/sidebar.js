@@ -8,28 +8,30 @@ export class SidebarCategory {
     this.icon = icon;
     this.canAdd = canAdd;
 
-    this.node = DomStuff.makeDiv('.sidebarCategory');
-
     const button = DomStuff.makeButton(displayName);
-    button.classList.add('categoryTitle');
-    this.node.appendChild(button);
+    button.classList.add('categoryButton');
+    this.button = button;
 
-    this.node.id = name;
+    this.button.setAttribute('buttonName', name);
+  }
+
+  getCanAdd() {
+    return this.canAdd;
   }
 
   getName() {
     return this.name;
   }
 
+  getDisplayName() {
+    return this.displayName;
+  }
+
   getContents() {
     return this.contents;
   }
 
-  getNode() {
-    return this.node;
-  }
-
-  getCanAdd() {
-    return this.canAdd;
+  getButton() {
+    return this.button;
   }
 }

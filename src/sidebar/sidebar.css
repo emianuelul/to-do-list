@@ -27,7 +27,16 @@
   padding: 2em 0;
 }
 
-.categoryTitle {
-  font-size: 1.75rem;
+.categoryButton {
+  font-size: 1.5rem;
+  border-radius: 8px;
   width: 100%;
+}
+
+.categoryButton:hover {
+  background: rgb(213, 213, 213);
+}
+
+.categoryButton.clicked {
+  background: rgb(213, 213, 213);
 }
