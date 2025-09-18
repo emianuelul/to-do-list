@@ -21,7 +21,7 @@ const processor = (function () {
     dueTmrw: [],
   };
 
-  let basicCategories = {
+  let categories = {
     dueTmrwCategory: new SidebarCategory(
       'duetmrw',
       'Due Tomorrow',
@@ -32,25 +32,25 @@ const processor = (function () {
       'alltodos',
       "All <span class='nowrap'>To-Do's</span>",
       basics.todoAll,
-      true
+      false
     ),
     favoritesCategory: new SidebarCategory(
       'favorites',
       'Favorites',
       basics.favorites,
-      true
+      false
     ),
     completedCategory: new SidebarCategory(
       'completed',
       "Completed <span class='nowrap'>To-Do's</span>",
       basics.completed,
-      true
+      false
     ),
     uncompletedCategory: new SidebarCategory(
       'uncompleted',
       "Uncompleted <span class='nowrap'>To-Do's</span>",
       basics.uncompleted,
-      true
+      false
     ),
   };
 
@@ -87,11 +87,6 @@ const processor = (function () {
 
         const toDoObj = DomStuff.createToDoItem(formText, formDate);
 
-        if (currentPage.getName() === 'favorites') {
-          toDoObj.item.toggleFavorite();
-          toDoObj.todo.querySelector('.todoFavorite').classList.add('visible');
-          basics.favorites.push(toDoObj.item);
-        }
         checkDueTmrw(toDoObj.item);
 
         todos.removeChild(form);
@@ -103,6 +98,7 @@ const processor = (function () {
 
         basics.uncompleted.push(toDoObj.item);
         basics.todoAll.push(toDoObj.item);
+        currentPage.getContents().push(toDoObj.item);
       });
     });
     todos.appendChild(btn);
@@ -110,10 +106,59 @@ const processor = (function () {
     return btn;
   };
 
+  const userCategoriesDiv = DomStuff.makeDiv('#userCategories');
+  const initUserSideBar = () => {
+    createAddCategoryBtn();
+
+    userCategoriesDiv.classList.add('sidebarSection');
+    sideBar.appendChild(userCategoriesDiv);
+
+    userCategoriesDiv.appendChild(addCategoryBtn);
+  };
+
+  const createAddCategoryBtn = () => {
+    const btn = DomStuff.makeButton('+');
+    btn.id = 'addCategory';
+
+    btn.addEventListener('click', (event) => {
+      const form = DomStuff.createCategoryForm();
+
+      userCategoriesDiv.insertBefore(form, btn);
+
+      form.addEventListener('click', (event) => {
+        if (event.target.classList.contains('cancelCtgBtn')) {
+          form.remove();
+        }
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const data = new FormData(form);
+        const textContent = data.get('textInput');
+        const icon = data.get('iconInput');
+
+        categories[textContent] = new SidebarCategory(
+          textContent,
+          textContent,
+          [],
+          true,
+          icon
+        );
+
+        form.remove();
+
+        const newCategoryBtn = categories[textContent].getButton();
+        userCategoriesDiv.insertBefore(newCategoryBtn, btn);
+      });
+    });
+
+    return btn;
+  };
+
   const checkDueTmrw = (item) => {
     if (differenceInCalendarDays(item.getDate(), currentDay) === 1) {
       basics.dueTmrw.push(item);
-      console.log('ok');
     }
   };
 
@@ -193,9 +238,10 @@ const processor = (function () {
   };
 
   let currentPage = null;
-  const addBtn = createAddToDoBtn();
+  const addToDoBtn = createAddToDoBtn();
   const changePage = (page) => {
     currentPage = page;
+    console.log('Current Page Name: ' + currentPage.getName());
 
     todos.innerHTML = '';
     const h1 = DomStuff.makeH(1, page.getDisplayName());
@@ -204,35 +250,38 @@ const processor = (function () {
     todos.appendChild(h1);
 
     if (page.getCanAdd()) {
-      todos.appendChild(addBtn);
+      todos.appendChild(addToDoBtn);
     }
     createToDos(page.getContents());
+  };
+
+  const addCategoryBtn = createAddCategoryBtn();
+  const initBasicsSideBar = () => {
+    const basicsDiv = DomStuff.makeDiv('#basics');
+    basicsDiv.classList.add('sidebarSection');
+    sideBar.appendChild(basicsDiv);
+
+    Object.values(categories).forEach((item) => {
+      basicsDiv.appendChild(item.getButton());
+    });
   };
 
   const initSideBar = () => {
     currentPage.getButton().classList.add('clicked');
 
-    const basicsDiv = DomStuff.makeDiv('#basics');
-    basicsDiv.classList.add('sidebarSection');
-    sideBar.appendChild(basicsDiv);
-
-    const userProjects = DomStuff.makeDiv('#userProjects');
-    userProjects.classList.add('sidebarSection');
-    sideBar.appendChild(userProjects);
-
-    Object.values(basicCategories).forEach((item) => {
-      basicsDiv.appendChild(item.getButton());
-    });
+    initBasicsSideBar();
+    initUserSideBar();
 
     sideBar.addEventListener('click', (event) => {
       const btn = event.target.closest('button.categoryButton');
       if (!btn) return;
 
-      for (const key in basicCategories) {
-        basicCategories[key].getButton().classList.remove('clicked');
+      for (const key in categories) {
+        categories[key].getButton().classList.remove('clicked');
       }
+
       const name = btn.getAttribute('buttonName');
-      const clickedCategory = Object.values(basicCategories).find(
+      let clickedCategory = Object.values(categories).find(
         (c) => c.getName() === name
       );
 
@@ -240,12 +289,14 @@ const processor = (function () {
         changePage(clickedCategory);
       }
 
+      console.log(clickedCategory);
+
       btn.classList.add('clicked');
     });
   };
 
   const startApp = () => {
-    changePage(basicCategories.dueTmrwCategory);
+    changePage(categories.dueTmrwCategory);
   };
 
   startApp();

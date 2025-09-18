@@ -27,16 +27,37 @@
   padding: 2em 0;
 }
 
-.categoryButton {
+#basics {
+  border-bottom: 3px solid black;
+}
+
+#sidebar > * > button {
   font-size: 1.5rem;
   border-radius: 8px;
   width: 100%;
 }
 
-.categoryButton:hover {
+#sidebar > * > button:hover {
   background: rgb(213, 213, 213);
 }
 
 .categoryButton.clicked {
   background: rgb(213, 213, 213);
+}
+
+.categoryForm {
+  border: 3px solid grey;
+  border-radius: 6px;
+  padding: 1em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.categoryForm > input[type='text'] {
+  text-align: center;
 }

@@ -110,11 +110,11 @@ export class DomStuff {
     const submitButton = DomStuff.makeButton('Submit');
     submitButton.type = 'submit';
 
-    const cancelButton = DomStuff.makeButton('x');
-    cancelButton.classList.add('cancelBtn');
-    cancelButton.type = 'button';
+    const cancelBtn = DomStuff.makeButton('x');
+    cancelBtn.classList.add('cancelBtn');
+    cancelBtn.type = 'button';
 
-    form.append(cancelButton, textInput, dateInput, submitButton);
+    form.append(cancelBtn, textInput, dateInput, submitButton);
 
     return form;
   }
@@ -146,5 +146,41 @@ export class DomStuff {
       todo,
       item,
     };
+  }
+
+  static createCategoryForm() {
+    const form = document.createElement('form');
+    form.classList.add('categoryForm');
+
+    const textInput = DomStuff.makeInput('text', true);
+    textInput.name = 'textInput';
+    textInput.id = 'textInput';
+
+    const textLabel = DomStuff.makeLabel(textInput.id, 'Category Name: ');
+
+    const iconInput = DomStuff.makeInput('text', false);
+    iconInput.name = 'iconInput';
+    iconInput.id = 'iconInput';
+    iconInput.maxLength = 1;
+
+    const iconLabel = DomStuff.makeLabel(iconInput.id, 'Icon: ');
+
+    const submitButton = DomStuff.makeButton('Create');
+    submitButton.type = 'submit';
+
+    const cancelBtn = DomStuff.makeButton('x');
+    cancelBtn.classList.add('cancelCtgBtn');
+    cancelBtn.type = 'button';
+
+    form.append(
+      cancelBtn,
+      iconLabel,
+      iconInput,
+      textLabel,
+      textInput,
+      submitButton
+    );
+
+    return form;
   }
 }
