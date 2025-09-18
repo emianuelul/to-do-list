@@ -104,10 +104,8 @@ const processor = (function () {
         todos.insertBefore(toDoObj.todo, btn);
 
         toDoObj.todo.addEventListener('click', (event) => {
-          todoBtnClickEvents(event, toDoObj, toDoClass);
-
           if (formDesc) {
-            const element = event.target.classList.contains('todoCheck')
+            const element = !event.target.classList.contains('todo')
               ? undefined
               : event.target.closest('.todo');
 
@@ -117,6 +115,7 @@ const processor = (function () {
               element.classList.add('clicked');
             }
           }
+          todoBtnClickEvents(event, toDoObj, toDoClass);
         });
 
         arrays.uncompleted.push(toDoClass);
