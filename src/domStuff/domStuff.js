@@ -1,10 +1,11 @@
-class ToDoItem {
-  constructor(node, text, date, check, favorite) {
+export class ToDoItem {
+  constructor(node, text, date, check, favorite, parent) {
     this.node = node;
     this.text = text;
     this.date = date;
     this.check = check;
     this.favorite = favorite;
+    this.parent = parent;
   }
 
   getText() {
@@ -17,6 +18,10 @@ class ToDoItem {
 
   getNode() {
     return this.node;
+  }
+
+  getParent() {
+    return this.parent;
   }
 
   toggleCheck() {
@@ -132,19 +137,18 @@ export class DomStuff {
     dateLabel.classList.add('todoDate');
     DomStuff.#labels++;
 
+    const parent = DomStuff.makeP('< placeholder');
+
     const favoriteBtn = DomStuff.makeButton('⭐');
     favoriteBtn.classList.add('todoFavorite');
 
     const deleteBtn = DomStuff.makeButton('🗑️');
     deleteBtn.classList.add('todoDelete');
 
-    const item = new ToDoItem(todo, text, date, checkBox.checked, false);
-
-    todo.append(checkBox, label, dateLabel, favoriteBtn, deleteBtn);
+    todo.append(checkBox, label, dateLabel, parent, favoriteBtn, deleteBtn);
 
     return {
       todo,
-      item,
     };
   }
 

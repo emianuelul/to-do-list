@@ -2,18 +2,17 @@ import './cssReset.css';
 import './basicStyles.css';
 import './sidebar/sidebar.css';
 
-import { DomStuff } from './domStuff/domStuff.js';
+import { DomStuff, ToDoItem } from './domStuff/domStuff.js';
 import { SidebarCategory } from './sidebar/sidebar.js';
 import { differenceInCalendarDays } from 'date-fns';
 
 /*
   TO DO:
   1. Make app have persistent storage
-  2. Make add button more modular (don't create a different button each time you change pages, keep the button through a refference and just move it around)
  */
 
 const processor = (function () {
-  let basics = {
+  let arrays = {
     todoAll: [],
     favorites: [],
     completed: [],
@@ -25,31 +24,31 @@ const processor = (function () {
     dueTmrwCategory: new SidebarCategory(
       'duetmrw',
       'Due Tomorrow',
-      basics.dueTmrw,
+      arrays.dueTmrw,
       false
     ),
     allTodosCategory: new SidebarCategory(
       'alltodos',
       "All <span class='nowrap'>To-Do's</span>",
-      basics.todoAll,
+      arrays.todoAll,
       false
     ),
     favoritesCategory: new SidebarCategory(
       'favorites',
       'Favorites',
-      basics.favorites,
+      arrays.favorites,
       false
     ),
     completedCategory: new SidebarCategory(
       'completed',
       "Completed <span class='nowrap'>To-Do's</span>",
-      basics.completed,
+      arrays.completed,
       false
     ),
     uncompletedCategory: new SidebarCategory(
       'uncompleted',
       "Uncompleted <span class='nowrap'>To-Do's</span>",
-      basics.uncompleted,
+      arrays.uncompleted,
       false
     ),
   };
@@ -86,19 +85,30 @@ const processor = (function () {
         const formDate = data.get('dateInput');
 
         const toDoObj = DomStuff.createToDoItem(formText, formDate);
+        const toDoClass = new ToDoItem(
+          toDoObj.todo,
+          formText,
+          formDate,
+          false,
+          false,
+          currentPage.getName()
+        );
 
-        checkDueTmrw(toDoObj.item);
+        toDoObj.todo.querySelector('p').textContent =
+          '< ' + toDoClass.getParent();
+
+        checkDueTmrw(toDoClass);
 
         todos.removeChild(form);
         todos.insertBefore(toDoObj.todo, btn);
 
         toDoObj.todo.addEventListener('click', (event) =>
-          todoBtnClickEvents(event, toDoObj)
+          todoBtnClickEvents(event, toDoObj, toDoClass)
         );
 
-        basics.uncompleted.push(toDoObj.item);
-        basics.todoAll.push(toDoObj.item);
-        currentPage.getContents().push(toDoObj.item);
+        arrays.uncompleted.push(toDoClass);
+        arrays.todoAll.push(toDoClass);
+        currentPage.getContents().push(toDoClass);
       });
     });
     todos.appendChild(btn);
@@ -141,7 +151,7 @@ const processor = (function () {
         categories[textContent] = new SidebarCategory(
           textContent,
           textContent,
-          [],
+          (arrays[textContent] = []),
           true,
           icon
         );
@@ -158,7 +168,7 @@ const processor = (function () {
 
   const checkDueTmrw = (item) => {
     if (differenceInCalendarDays(item.getDate(), currentDay) === 1) {
-      basics.dueTmrw.push(item);
+      arrays.dueTmrw.push(item);
     }
   };
 
@@ -171,68 +181,68 @@ const processor = (function () {
     });
   };
 
-  const belongsToPage = (todoItem, page) => {
+  const belongsToPage = (toDoItem, page) => {
     switch (page.getName()) {
       case 'completed':
-        return todoItem.isChecked();
+        return toDoItem.isChecked();
       case 'uncompleted':
-        return !todoItem.isChecked();
+        return !toDoItem.isChecked();
       case 'favorites':
-        return todoItem.isFavorite();
+        return toDoItem.isFavorite();
       case 'alltodos':
       default:
         return true;
     }
   };
 
-  const todoBtnClickEvents = (event, todoObj) => {
-    const favoriteBtn = todoObj.todo.querySelector('.todoFavorite');
-    const todoDOM = todoObj.todo;
-    const todoItem = todoObj.item;
+  const todoBtnClickEvents = (event, toDoObj, item) => {
+    const favoriteBtn = toDoObj.todo.querySelector('.todoFavorite');
+    const toDoDOM = toDoObj.todo;
+    const toDoItem = item;
 
     if (event.target.classList.contains('todoCheck')) {
-      todoItem.toggleCheck();
+      toDoItem.toggleCheck();
 
-      if (todoItem.isChecked()) {
-        basics.completed.push(todoItem);
+      if (toDoItem.isChecked()) {
+        arrays.completed.push(toDoItem);
 
-        let index = basics.uncompleted.indexOf(todoItem);
+        let index = arrays.uncompleted.indexOf(toDoItem);
         if (index !== -1) {
-          basics.uncompleted.splice(index, 1);
+          arrays.uncompleted.splice(index, 1);
         }
       } else {
-        basics.uncompleted.push(todoItem);
+        arrays.uncompleted.push(toDoItem);
 
-        let index = basics.completed.indexOf(todoItem);
+        let index = arrays.completed.indexOf(toDoItem);
         if (index !== -1) {
-          basics.completed.splice(index, 1);
+          arrays.completed.splice(index, 1);
         }
       }
 
-      if (currentPage && !belongsToPage(todoItem, currentPage)) {
-        todoDOM.remove();
+      if (currentPage && !belongsToPage(toDoItem, currentPage)) {
+        toDoDOM.remove();
       }
     } else if (event.target.classList.contains('todoFavorite')) {
       if (favoriteBtn.classList.contains('visible')) {
-        todoItem.toggleFavorite();
+        toDoItem.toggleFavorite();
         favoriteBtn.classList.remove('visible');
-        const i = basics.favorites.indexOf(todoItem);
-        if (i !== -1) basics.favorites.splice(i, 1);
+        const i = arrays.favorites.indexOf(toDoItem);
+        if (i !== -1) arrays.favorites.splice(i, 1);
       } else {
-        todoItem.toggleFavorite();
+        toDoItem.toggleFavorite();
         favoriteBtn.classList.add('visible');
-        basics.favorites.push(todoItem);
+        arrays.favorites.push(toDoItem);
       }
 
-      if (currentPage && !belongsToPage(todoItem, currentPage)) {
-        todoDOM.remove();
+      if (currentPage && !belongsToPage(toDoItem, currentPage)) {
+        toDoDOM.remove();
       }
     } else if (event.target.classList.contains('todoDelete')) {
-      todoDOM.remove();
+      toDoDOM.remove();
 
-      Object.values(basics).forEach((element) => {
-        const i = element.indexOf(todoItem);
-        element.splice(i, 1);
+      Object.values(arrays).forEach((element) => {
+        const i = element.indexOf(toDoItem);
+        if (i > -1) element.splice(i, 1);
       });
     }
   };
