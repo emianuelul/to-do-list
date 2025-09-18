@@ -1,11 +1,14 @@
 export class ToDoItem {
-  constructor(node, text, date, check, favorite, parent) {
+  constructor(node, text, date, check, favorite, parent, desc = '') {
     this.node = node;
+
     this.text = text;
     this.date = date;
+    this.parent = parent;
+    this.desc = desc;
+
     this.check = check;
     this.favorite = favorite;
-    this.parent = parent;
   }
 
   getText() {
@@ -119,12 +122,17 @@ export class DomStuff {
     cancelBtn.classList.add('cancelBtn');
     cancelBtn.type = 'button';
 
-    form.append(cancelBtn, textInput, dateInput, submitButton);
+    const desc = DomStuff.makeInput('text', false);
+    desc.name = 'descInput';
+    desc.id = desc.name;
+    desc.classList.add('todoDescForm');
+
+    form.append(cancelBtn, textInput, dateInput, submitButton, desc);
 
     return form;
   }
 
-  static createToDoItem(text, date) {
+  static createToDoItem(text, date, desc) {
     const todo = DomStuff.makeDiv('.todo');
 
     const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
@@ -137,7 +145,7 @@ export class DomStuff {
     dateLabel.classList.add('todoDate');
     DomStuff.#labels++;
 
-    const parent = DomStuff.makeP('< placeholder');
+    const parent = DomStuff.makeP();
     parent.classList.add('parentText');
 
     const favoriteBtn = DomStuff.makeButton('⭐');
@@ -146,7 +154,32 @@ export class DomStuff {
     const deleteBtn = DomStuff.makeButton('🗑️');
     deleteBtn.classList.add('todoDelete');
 
-    todo.append(checkBox, label, dateLabel, parent, favoriteBtn, deleteBtn);
+    const description = DomStuff.makeP(desc);
+    description.classList.add('todoDesc');
+
+    // todo.append(
+    //   checkBox,
+    //   label,
+    //   dateLabel,
+    //   description,
+    //   parent,
+    //   favoriteBtn,
+    //   deleteBtn
+    // );
+
+    todo.append(
+      checkBox,
+      label,
+      dateLabel,
+      parent,
+      favoriteBtn,
+      deleteBtn,
+      description
+    );
+
+    if (!desc) {
+      description.remove();
+    }
 
     return {
       todo,

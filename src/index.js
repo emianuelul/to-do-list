@@ -83,8 +83,9 @@ const processor = (function () {
         const data = new FormData(form);
         const formText = data.get('textInput');
         const formDate = data.get('dateInput');
+        const formDesc = data.get('descInput');
 
-        const toDoObj = DomStuff.createToDoItem(formText, formDate);
+        const toDoObj = DomStuff.createToDoItem(formText, formDate, formDesc);
         const toDoClass = new ToDoItem(
           toDoObj.todo,
           formText,
@@ -94,17 +95,29 @@ const processor = (function () {
           currentPage.getName()
         );
 
-        toDoObj.todo.querySelector('p').textContent =
-          '< ' + toDoClass.getParent();
+        toDoObj.todo.querySelector('.parentText ').textContent =
+          toDoClass.getParent();
 
         checkDueTmrw(toDoClass);
 
         todos.removeChild(form);
         todos.insertBefore(toDoObj.todo, btn);
 
-        toDoObj.todo.addEventListener('click', (event) =>
-          todoBtnClickEvents(event, toDoObj, toDoClass)
-        );
+        toDoObj.todo.addEventListener('click', (event) => {
+          todoBtnClickEvents(event, toDoObj, toDoClass);
+
+          if (formDesc) {
+            const element = event.target.classList.contains('todoCheck')
+              ? undefined
+              : event.target.closest('.todo');
+
+            if (element && element.classList.contains('clicked')) {
+              element.classList.remove('clicked');
+            } else if (element) {
+              element.classList.add('clicked');
+            }
+          }
+        });
 
         arrays.uncompleted.push(toDoClass);
         arrays.todoAll.push(toDoClass);
@@ -298,8 +311,6 @@ const processor = (function () {
       if (clickedCategory) {
         changePage(clickedCategory);
       }
-
-      console.log(clickedCategory);
 
       btn.classList.add('clicked');
     });
