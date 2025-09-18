@@ -138,6 +138,7 @@ export class DomStuff {
     DomStuff.#labels++;
 
     const parent = DomStuff.makeP('< placeholder');
+    parent.classList.add('parentText');
 
     const favoriteBtn = DomStuff.makeButton('⭐');
     favoriteBtn.classList.add('todoFavorite');
@@ -165,7 +166,10 @@ export class DomStuff {
     const iconInput = DomStuff.makeInput('text', false);
     iconInput.name = 'iconInput';
     iconInput.id = 'iconInput';
-    iconInput.maxLength = 1;
+
+    iconInput.addEventListener('input', () => {
+      iconInput.value = iconInput.value.match(/\p{Emoji}/gu)?.join('') ?? '';
+    });
 
     const iconLabel = DomStuff.makeLabel(iconInput.id, 'Icon: ');
 

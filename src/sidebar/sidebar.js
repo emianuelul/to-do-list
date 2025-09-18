@@ -8,7 +8,7 @@ export class SidebarCategory {
     this.icon = icon;
     this.canAdd = canAdd;
 
-    const button = DomStuff.makeButton(displayName);
+    const button = DomStuff.makeButton(icon + ' ' + displayName);
     button.classList.add('categoryButton');
     this.button = button;
 

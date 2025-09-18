@@ -81,3 +81,8 @@ button {
 .todoFavorite.visible {
   opacity: 1;
 }
+
+.todo > .parentText {
+  font-size: 1.25rem;
+  text-align: center;
+}
