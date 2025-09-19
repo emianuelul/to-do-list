@@ -4,12 +4,7 @@ import './sidebar/sidebar.css';
 
 import { DomStuff, ToDoItem } from './domStuff/domStuff.js';
 import { SidebarCategory } from './sidebar/sidebar.js';
-import { differenceInCalendarDays } from 'date-fns';
-
-/*
-  TO DO:
-  1. Make app have persistent storage
- */
+import { differenceInCalendarDays, format, parse } from 'date-fns';
 
 const processor = (function () {
   let arrays = {
@@ -20,7 +15,7 @@ const processor = (function () {
     dueTmrw: [],
   };
 
-  let categories = {
+  let initCategories = {
     dueTmrwCategory: new SidebarCategory(
       'duetmrw',
       'Due Tomorrow',
@@ -53,7 +48,15 @@ const processor = (function () {
     ),
   };
 
+  let userCategories = {};
+
   const currentDay = new Date();
+  const checkDueTmrw = (item) => {
+    const date = parse(item.getDate(), 'dd/MM/yyyy', currentDay);
+    if (differenceInCalendarDays(date, currentDay) === 1) {
+      arrays.dueTmrw.push(item);
+    }
+  };
 
   const content = document.querySelector('#content');
 
@@ -62,6 +65,76 @@ const processor = (function () {
 
   const todos = DomStuff.makeDiv('.todos');
   content.appendChild(todos);
+
+  const saveObjectToLocalStorage = (key, value) => {
+    localStorage.setItem(key, JSON.stringify(value));
+  };
+
+  const buildFromStorage = () => {
+    for (const key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        let parsedObj = JSON.parse(localStorage[key]);
+        console.log(parsedObj);
+        for (let i = 0; i < parsedObj.contents.length; i++) {
+          const currObj = parsedObj.contents[i]; // to get the properties easier
+          const toDoObj = DomStuff.createToDoItem(
+            currObj.text,
+            currObj.date,
+            currObj.desc
+          );
+
+          parsedObj.contents[i] = new ToDoItem(
+            toDoObj.todo,
+            currObj.text,
+            currObj.date,
+            false,
+            false,
+            currObj.parent,
+            currObj.desc
+          );
+
+          arrays.todoAll.push(parsedObj.contents[i]);
+          arrays.uncompleted.push(parsedObj.contents[i]);
+          checkDueTmrw(parsedObj.contents[i]);
+
+          if (currObj.check) {
+            parsedObj.contents[i].toggleCheck();
+            toDoObj.todo.querySelector('.todoCheck').checked = true;
+            arrays.completed.push(parsedObj.contents[i]);
+
+            let index = arrays.uncompleted.indexOf(parsedObj.contents[i]);
+            if (index !== -1) {
+              arrays.uncompleted.splice(index, 1);
+            }
+          }
+          if (currObj.favorite) {
+            parsedObj.contents[i].toggleFavorite();
+            toDoObj.todo
+              .querySelector('.todoFavorite')
+              .classList.add('visible');
+            arrays.favorites.push(parsedObj.contents[i]);
+          }
+
+          toDoObj.todo.querySelector('.parentText ').textContent =
+            currObj.parent;
+
+          addClickEventBtn(toDoObj, parsedObj.contents[i], currObj.desc);
+        }
+        parsedObj = new SidebarCategory(
+          parsedObj.name,
+          parsedObj.displayName,
+          parsedObj.contents,
+          parsedObj.canAdd,
+          parsedObj.icon
+        );
+
+        arrays[parsedObj.name] = parsedObj.contents;
+        userCategories[parsedObj.name] = parsedObj;
+
+        userCategoriesDiv.appendChild(parsedObj.getButton());
+      }
+    }
+  };
 
   const createAddToDoBtn = () => {
     const btn = DomStuff.makeButton('+');
@@ -82,7 +155,7 @@ const processor = (function () {
 
         const data = new FormData(form);
         const formText = data.get('textInput');
-        const formDate = data.get('dateInput');
+        const formDate = format(new Date(data.get('dateInput')), 'dd/MM/yyyy');
         const formDesc = data.get('descInput');
 
         const toDoObj = DomStuff.createToDoItem(formText, formDate, formDesc);
@@ -92,7 +165,8 @@ const processor = (function () {
           formDate,
           false,
           false,
-          currentPage.getName()
+          currentPage.getName(),
+          formDesc
         );
 
         toDoObj.todo.querySelector('.parentText ').textContent =
@@ -100,27 +174,21 @@ const processor = (function () {
 
         checkDueTmrw(toDoClass);
 
+        addClickEventBtn(toDoObj, toDoClass, formDesc);
+
         todos.removeChild(form);
         todos.insertBefore(toDoObj.todo, btn);
-
-        toDoObj.todo.addEventListener('click', (event) => {
-          if (formDesc) {
-            const element = !event.target.classList.contains('todo')
-              ? undefined
-              : event.target.closest('.todo');
-
-            if (element && element.classList.contains('clicked')) {
-              element.classList.remove('clicked');
-            } else if (element) {
-              element.classList.add('clicked');
-            }
-          }
-          todoBtnClickEvents(event, toDoObj, toDoClass);
-        });
 
         arrays.uncompleted.push(toDoClass);
         arrays.todoAll.push(toDoClass);
         currentPage.getContents().push(toDoClass);
+
+        saveObjectToLocalStorage(
+          toDoClass.getParent(),
+          Object.values(userCategories).find(
+            (c) => c.getName() === toDoClass.getParent()
+          )
+        );
       });
     });
     todos.appendChild(btn);
@@ -160,7 +228,7 @@ const processor = (function () {
         const textContent = data.get('textInput');
         const icon = data.get('iconInput');
 
-        categories[textContent] = new SidebarCategory(
+        userCategories[textContent] = new SidebarCategory(
           textContent,
           textContent,
           (arrays[textContent] = []),
@@ -170,18 +238,14 @@ const processor = (function () {
 
         form.remove();
 
-        const newCategoryBtn = categories[textContent].getButton();
+        saveObjectToLocalStorage(textContent, userCategories[textContent]);
+
+        const newCategoryBtn = userCategories[textContent].getButton();
         userCategoriesDiv.insertBefore(newCategoryBtn, btn);
       });
     });
 
     return btn;
-  };
-
-  const checkDueTmrw = (item) => {
-    if (differenceInCalendarDays(item.getDate(), currentDay) === 1) {
-      arrays.dueTmrw.push(item);
-    }
   };
 
   const createToDos = (array) => {
@@ -205,6 +269,23 @@ const processor = (function () {
       default:
         return true;
     }
+  };
+
+  const addClickEventBtn = (toDoObj, toDoClass, formDesc) => {
+    toDoObj.todo.addEventListener('click', (event) => {
+      if (formDesc) {
+        const element = !event.target.classList.contains('todo')
+          ? undefined
+          : event.target.closest('.todo');
+
+        if (element && element.classList.contains('clicked')) {
+          element.classList.remove('clicked');
+        } else if (element) {
+          element.classList.add('clicked');
+        }
+      }
+      todoBtnClickEvents(event, toDoObj, toDoClass);
+    });
   };
 
   const todoBtnClickEvents = (event, toDoObj, item) => {
@@ -234,6 +315,13 @@ const processor = (function () {
       if (currentPage && !belongsToPage(toDoItem, currentPage)) {
         toDoDOM.remove();
       }
+
+      saveObjectToLocalStorage(
+        toDoItem.getParent(),
+        Object.values(userCategories).find(
+          (c) => c.getName() === toDoItem.getParent()
+        )
+      );
     } else if (event.target.classList.contains('todoFavorite')) {
       if (favoriteBtn.classList.contains('visible')) {
         toDoItem.toggleFavorite();
@@ -249,6 +337,13 @@ const processor = (function () {
       if (currentPage && !belongsToPage(toDoItem, currentPage)) {
         toDoDOM.remove();
       }
+
+      saveObjectToLocalStorage(
+        toDoItem.getParent(),
+        Object.values(userCategories).find(
+          (c) => c.getName() === toDoItem.getParent()
+        )
+      );
     } else if (event.target.classList.contains('todoDelete')) {
       toDoDOM.remove();
 
@@ -256,6 +351,12 @@ const processor = (function () {
         const i = element.indexOf(toDoItem);
         if (i > -1) element.splice(i, 1);
       });
+      saveObjectToLocalStorage(
+        toDoItem.getParent(),
+        Object.values(userCategories).find(
+          (c) => c.getName() === toDoItem.getParent()
+        )
+      );
     }
   };
 
@@ -283,9 +384,14 @@ const processor = (function () {
     basicsDiv.classList.add('sidebarSection');
     sideBar.appendChild(basicsDiv);
 
-    Object.values(categories).forEach((item) => {
+    Object.values(initCategories).forEach((item) => {
       basicsDiv.appendChild(item.getButton());
     });
+  };
+
+  const getClickedCategory = (categories, btn) => {
+    const name = btn.getAttribute('buttonName');
+    return Object.values(categories).find((c) => c.getName() === name);
   };
 
   const initSideBar = () => {
@@ -298,14 +404,15 @@ const processor = (function () {
       const btn = event.target.closest('button.categoryButton');
       if (!btn) return;
 
-      for (const key in categories) {
-        categories[key].getButton().classList.remove('clicked');
+      const categoryBtns = [...document.querySelectorAll('.categoryButton')];
+
+      for (const key in categoryBtns) {
+        categoryBtns[key].classList.remove('clicked');
       }
 
-      const name = btn.getAttribute('buttonName');
-      let clickedCategory = Object.values(categories).find(
-        (c) => c.getName() === name
-      );
+      const clickedCategory =
+        getClickedCategory(userCategories, btn) ||
+        getClickedCategory(initCategories, btn);
 
       if (clickedCategory) {
         changePage(clickedCategory);
@@ -316,9 +423,10 @@ const processor = (function () {
   };
 
   const startApp = () => {
-    changePage(categories.dueTmrwCategory);
+    buildFromStorage();
+    changePage(initCategories.dueTmrwCategory);
+    initSideBar();
   };
 
   startApp();
-  initSideBar();
 })();

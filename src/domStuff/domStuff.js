@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 export class ToDoItem {
   constructor(node, text, date, check, favorite, parent, desc = '') {
     this.node = node;
@@ -156,16 +158,6 @@ export class DomStuff {
 
     const description = DomStuff.makeP(desc);
     description.classList.add('todoDesc');
-
-    // todo.append(
-    //   checkBox,
-    //   label,
-    //   dateLabel,
-    //   description,
-    //   parent,
-    //   favoriteBtn,
-    //   deleteBtn
-    // );
 
     todo.append(
       checkBox,
