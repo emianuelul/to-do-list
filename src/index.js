@@ -78,7 +78,6 @@ const processor = (function () {
     for (const key in localStorage) {
       if (localStorage.hasOwnProperty(key)) {
         let parsedObj = JSON.parse(localStorage[key]);
-        console.log(parsedObj);
         for (let i = 0; i < parsedObj.contents.length; i++) {
           const currObj = parsedObj.contents[i]; // to get the properties easier
           const toDoObj = DomStuff.createToDoItem(
@@ -234,19 +233,10 @@ const processor = (function () {
         const textContent = data.get('textInput');
         const icon = data.get('iconInput');
 
-        if (
-          Object.values(userCategories).find((c) => c.getName() === textContent)
-        ) {
-          alert(
-            'A category / project with this name already exists! Try a different name.'
-          );
-          return;
-        } else if (
-          Object.values(initCategories).find((c) => c.getName() === textContent)
-        ) {
-          alert('A category with this name exists! Try a different name.');
+        if (checkExistingCategory(textContent)) {
           return;
         }
+
         userCategories[textContent] = new SidebarCategory(
           textContent,
           textContent,
@@ -261,6 +251,7 @@ const processor = (function () {
 
         const newCategoryBtn = userCategories[textContent].getButton();
         userCategoriesDiv.insertBefore(newCategoryBtn, btn);
+        changePage(userCategories[textContent]);
       });
     });
 
@@ -379,39 +370,72 @@ const processor = (function () {
     }
   };
 
+  const makeEditable = (item, fn) => {
+    item.addEventListener('dblclick', () => {
+      item.setAttribute('contenteditable', 'true');
+    });
+
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.repeat) {
+        event.preventDefault();
+        item.blur();
+      }
+    });
+
+    item.addEventListener('blur', () => {
+      item.setAttribute('contenteditable', 'false');
+
+      fn();
+    });
+  };
+
+  const checkExistingCategory = (name) => {
+    if (Object.values(userCategories).find((c) => c.getName() === name)) {
+      alert(
+        'A category / project with this name already exists! Try a different name.'
+      );
+      return true;
+    } else if (
+      Object.values(initCategories).find((c) => c.getName() === name)
+    ) {
+      alert('A category with this name exists! Try a different name.');
+      return true;
+    }
+
+    return false;
+  };
+
   let currentPage = null;
   const addToDoBtn = createAddToDoBtn();
   const changePage = (page) => {
     currentPage = page;
+
+    Object.values(initCategories).forEach((c) => {
+      c.getButton().classList.remove('clicked');
+    });
+    currentPage.getButton().classList.add('clicked');
     console.log('Current Page Name: ' + currentPage.getName());
 
     todos.innerHTML = '';
-    const h1 = DomStuff.makeH(1, page.getDisplayName());
+    const title = DomStuff.createPageTitle(currentPage.getName());
+    const h1 = title.querySelector('.sectionTitle');
+    const deleteBtn = title.querySelector('.sectionDelete');
     if (
       Object.values(userCategories).find(
         (c) => c.getName() === currentPage.getName()
       )
     ) {
-      h1.addEventListener('dblclick', (event) => {
-        h1.setAttribute('contenteditable', 'true');
-      });
-
-      h1.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && !event.repeat) {
-          event.preventDefault();
-          h1.blur();
-        }
-      });
-
-      h1.addEventListener('blur', (event) => {
-        h1.setAttribute('contenteditable', 'false');
-
+      makeEditable(h1, () => {
         const newName = h1.innerText;
         const oldName = currentPage.getName();
 
+        if (checkExistingCategory(newName)) {
+          return;
+        }
+
         if (oldName !== newName) {
           currentPage.getButton().textContent =
-            currentPage.getIcon() + ' ' + h1.innerText;
+            currentPage.getIcon() + ' ' + newName;
 
           userCategories[newName] = userCategories[oldName];
           delete userCategories[oldName];
@@ -428,16 +452,37 @@ const processor = (function () {
             .getContents()
             .forEach((c) => c.setParent(newName));
 
-          // GET BACK HERE
           removeObjectFromLocalStorage(oldName);
           saveObjectToLocalStorage(newName, userCategories[newName]);
         }
       });
     }
-    h1.classList.add('sectionTitle');
 
-    todos.appendChild(h1);
+    deleteBtn.addEventListener('click', (event) => {
+      currentPage.getButton().remove();
 
+      Object.values(arrays).forEach((element) => {
+        element.forEach((c) => {
+          const i = element.indexOf(c);
+          if (i > -1) element.splice(i, 1);
+        });
+      });
+
+      delete arrays[currentPage.getName()];
+      delete userCategories[currentPage.getName()];
+      removeObjectFromLocalStorage(currentPage.getName());
+      changePage(initCategories.dueTmrwCategory);
+    });
+
+    todos.appendChild(title);
+
+    if (
+      Object.values(initCategories).find(
+        (c) => c.getName() === currentPage.getName()
+      )
+    ) {
+      title.querySelector('.sectionDelete').remove();
+    }
     if (page.getCanAdd()) {
       todos.appendChild(addToDoBtn);
     }
@@ -461,8 +506,6 @@ const processor = (function () {
   };
 
   const initSideBar = () => {
-    currentPage.getButton().classList.add('clicked');
-
     initBasicsSideBar();
     initUserSideBar();
 

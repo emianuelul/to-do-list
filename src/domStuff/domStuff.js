@@ -15,6 +15,10 @@ export class ToDoItem {
     return this.text;
   }
 
+  setText(text) {
+    this.text = text;
+  }
+
   getDate() {
     return this.date;
   }
@@ -33,7 +37,7 @@ export class ToDoItem {
   }
 
   toggleCheck() {
-    const label = this.node.querySelector('.todoLabel');
+    const label = this.node.querySelector('.todoText');
     this.check = !this.check;
 
     if (this.check === true) label.classList.add('strikethrough');
@@ -110,6 +114,18 @@ export class DomStuff {
     return p;
   }
 
+  static createPageTitle(titleText) {
+    const container = DomStuff.makeDiv('.titleContainer');
+    const title = DomStuff.makeH(1, titleText);
+    title.classList.add('sectionTitle');
+    const deleteButton = DomStuff.makeButton('🗑️');
+    deleteButton.classList.add('sectionDelete');
+
+    container.append(title, deleteButton);
+
+    return container;
+  }
+
   static createToDoForm() {
     const form = document.createElement('form');
     form.classList.add('todoform');
@@ -148,10 +164,10 @@ export class DomStuff {
     const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
     checkBox.classList.add('todoCheck');
 
-    const label = DomStuff.makeLabel(`${DomStuff.#labels}`, text);
-    label.classList.add('todoLabel');
+    const label = DomStuff.makeP(text);
+    label.classList.add('todoText');
 
-    const dateLabel = DomStuff.makeLabel(`${DomStuff.#labels}`, date);
+    const dateLabel = DomStuff.makeP(date);
     dateLabel.classList.add('todoDate');
     DomStuff.#labels++;
 

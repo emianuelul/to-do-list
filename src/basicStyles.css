@@ -13,6 +13,18 @@ button {
   user-select: none;
 }
 
+.titleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100%;
+}
+
+.titleContainer > .sectionTitle {
+  margin-right: auto;
+}
+
 .sectionTitle {
   text-align: center;
 }
@@ -66,9 +78,11 @@ button {
   border-radius: 12px;
 }
 
-.todo > label {
+.todo > .todoText,
+.todo > .todoDate {
   font-size: 1.5rem;
   max-width: max-content;
+  text-align: center;
 }
 
 .todoform {
