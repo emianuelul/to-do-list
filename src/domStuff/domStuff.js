@@ -1,5 +1,3 @@
-import { format } from 'date-fns';
-
 export class ToDoItem {
   constructor(node, text, date, check, favorite, parent, desc = '') {
     this.node = node;
@@ -27,6 +25,11 @@ export class ToDoItem {
 
   getParent() {
     return this.parent;
+  }
+
+  setParent(parentName) {
+    this.parent = parentName;
+    this.node.querySelector('.parentText').innerText = parentName;
   }
 
   toggleCheck() {
@@ -113,9 +116,13 @@ export class DomStuff {
 
     const textInput = DomStuff.makeInput('text', true);
     textInput.name = 'textInput';
+    textInput.placeholder = 'Name...';
 
-    const dateInput = DomStuff.makeInput('date', true);
+    const dateInput = DomStuff.makeInput('text', true);
     dateInput.name = 'dateInput';
+    dateInput.placeholder = 'dd/mm/yyyy';
+    dateInput.setAttribute('onfocus', '(this.type="date")');
+    dateInput.setAttribute('onblur', '(this.type="text")');
 
     const submitButton = DomStuff.makeButton('Submit');
     submitButton.type = 'submit';
@@ -128,6 +135,7 @@ export class DomStuff {
     desc.name = 'descInput';
     desc.id = desc.name;
     desc.classList.add('todoDescForm');
+    desc.placeholder = 'Description... (optional)';
 
     form.append(cancelBtn, textInput, dateInput, submitButton, desc);
 

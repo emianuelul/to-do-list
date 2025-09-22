@@ -6,9 +6,8 @@
   border-radius: 12px;
 
   flex: 1;
-  min-height: 100%;
+  max-height: calc(100vh - 2em);
 
-  padding: 1em;
   margin: 1em;
 }
 
@@ -19,12 +18,12 @@
 .sidebarSection {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: stretch;
 
   gap: 1em;
 
-  padding: 2em 0;
+  padding: 2em 1em;
 }
 
 #basics {
@@ -60,4 +59,23 @@
 
 .categoryForm > input[type='text'] {
   text-align: center;
+}
+
+#userCategories {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: 4px;
+  padding-right: calc(1em - 8px);
+}
+
+#userCategories::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+#userCategories::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+  opacity: 0.7;
 }

@@ -8,42 +8,42 @@ import { differenceInCalendarDays, format, parse } from 'date-fns';
 
 const processor = (function () {
   let arrays = {
-    todoAll: [],
-    favorites: [],
-    completed: [],
-    uncompleted: [],
-    dueTmrw: [],
+    "All To-Do's": [],
+    Favorites: [],
+    "Completed To-Do's": [],
+    "Uncompleted To-Do's": [],
+    'Due Tomorrow': [],
   };
 
   let initCategories = {
     dueTmrwCategory: new SidebarCategory(
-      'duetmrw',
       'Due Tomorrow',
-      arrays.dueTmrw,
+      'Due Tomorrow',
+      arrays['Due Tomorrow'],
       false
     ),
     allTodosCategory: new SidebarCategory(
-      'alltodos',
+      "All To-Do's",
       "All <span class='nowrap'>To-Do's</span>",
-      arrays.todoAll,
+      arrays["All To-Do's"],
       false
     ),
     favoritesCategory: new SidebarCategory(
-      'favorites',
       'Favorites',
-      arrays.favorites,
+      'Favorites',
+      arrays.Favorites,
       false
     ),
     completedCategory: new SidebarCategory(
-      'completed',
+      "Completed To-Do's",
       "Completed <span class='nowrap'>To-Do's</span>",
-      arrays.completed,
+      arrays["Completed To-Do's"],
       false
     ),
     uncompletedCategory: new SidebarCategory(
-      'uncompleted',
+      "Uncompleted To-Do's",
       "Uncompleted <span class='nowrap'>To-Do's</span>",
-      arrays.uncompleted,
+      arrays["Uncompleted To-Do's"],
       false
     ),
   };
@@ -54,7 +54,7 @@ const processor = (function () {
   const checkDueTmrw = (item) => {
     const date = parse(item.getDate(), 'dd/MM/yyyy', currentDay);
     if (differenceInCalendarDays(date, currentDay) === 1) {
-      arrays.dueTmrw.push(item);
+      arrays['Due Tomorrow'].push(item);
     }
   };
 
@@ -68,6 +68,10 @@ const processor = (function () {
 
   const saveObjectToLocalStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
+  };
+
+  const removeObjectFromLocalStorage = (key) => {
+    localStorage.removeItem(key);
   };
 
   const buildFromStorage = () => {
@@ -93,18 +97,20 @@ const processor = (function () {
             currObj.desc
           );
 
-          arrays.todoAll.push(parsedObj.contents[i]);
-          arrays.uncompleted.push(parsedObj.contents[i]);
+          arrays["All To-Do's"].push(parsedObj.contents[i]);
+          arrays["Uncompleted To-Do's"].push(parsedObj.contents[i]);
           checkDueTmrw(parsedObj.contents[i]);
 
           if (currObj.check) {
             parsedObj.contents[i].toggleCheck();
             toDoObj.todo.querySelector('.todoCheck').checked = true;
-            arrays.completed.push(parsedObj.contents[i]);
+            arrays["Completed To-Do's"].push(parsedObj.contents[i]);
 
-            let index = arrays.uncompleted.indexOf(parsedObj.contents[i]);
+            let index = arrays["Uncompleted To-Do's"].indexOf(
+              parsedObj.contents[i]
+            );
             if (index !== -1) {
-              arrays.uncompleted.splice(index, 1);
+              arrays["Uncompleted To-Do's"].splice(index, 1);
             }
           }
           if (currObj.favorite) {
@@ -112,7 +118,7 @@ const processor = (function () {
             toDoObj.todo
               .querySelector('.todoFavorite')
               .classList.add('visible');
-            arrays.favorites.push(parsedObj.contents[i]);
+            arrays.Favorites.push(parsedObj.contents[i]);
           }
 
           toDoObj.todo.querySelector('.parentText ').textContent =
@@ -179,8 +185,8 @@ const processor = (function () {
         todos.removeChild(form);
         todos.insertBefore(toDoObj.todo, btn);
 
-        arrays.uncompleted.push(toDoClass);
-        arrays.todoAll.push(toDoClass);
+        arrays["Uncompleted To-Do's"].push(toDoClass);
+        arrays["All To-Do's"].push(toDoClass);
         currentPage.getContents().push(toDoClass);
 
         saveObjectToLocalStorage(
@@ -228,6 +234,19 @@ const processor = (function () {
         const textContent = data.get('textInput');
         const icon = data.get('iconInput');
 
+        if (
+          Object.values(userCategories).find((c) => c.getName() === textContent)
+        ) {
+          alert(
+            'A category / project with this name already exists! Try a different name.'
+          );
+          return;
+        } else if (
+          Object.values(initCategories).find((c) => c.getName() === textContent)
+        ) {
+          alert('A category with this name exists! Try a different name.');
+          return;
+        }
         userCategories[textContent] = new SidebarCategory(
           textContent,
           textContent,
@@ -297,18 +316,18 @@ const processor = (function () {
       toDoItem.toggleCheck();
 
       if (toDoItem.isChecked()) {
-        arrays.completed.push(toDoItem);
+        arrays["Completed To-Do's"].push(toDoItem);
 
-        let index = arrays.uncompleted.indexOf(toDoItem);
+        let index = arrays["Uncompleted To-Do's"].indexOf(toDoItem);
         if (index !== -1) {
-          arrays.uncompleted.splice(index, 1);
+          arrays["Uncompleted To-Do's"].splice(index, 1);
         }
       } else {
-        arrays.uncompleted.push(toDoItem);
+        arrays["Uncompleted To-Do's"].push(toDoItem);
 
-        let index = arrays.completed.indexOf(toDoItem);
+        let index = arrays["Completed To-Do's"].indexOf(toDoItem);
         if (index !== -1) {
-          arrays.completed.splice(index, 1);
+          arrays["Completed To-Do's"].splice(index, 1);
         }
       }
 
@@ -326,12 +345,12 @@ const processor = (function () {
       if (favoriteBtn.classList.contains('visible')) {
         toDoItem.toggleFavorite();
         favoriteBtn.classList.remove('visible');
-        const i = arrays.favorites.indexOf(toDoItem);
-        if (i !== -1) arrays.favorites.splice(i, 1);
+        const i = arrays.Favorites.indexOf(toDoItem);
+        if (i !== -1) arrays.Favorites.splice(i, 1);
       } else {
         toDoItem.toggleFavorite();
         favoriteBtn.classList.add('visible');
-        arrays.favorites.push(toDoItem);
+        arrays.Favorites.push(toDoItem);
       }
 
       if (currentPage && !belongsToPage(toDoItem, currentPage)) {
@@ -368,6 +387,53 @@ const processor = (function () {
 
     todos.innerHTML = '';
     const h1 = DomStuff.makeH(1, page.getDisplayName());
+    if (
+      Object.values(userCategories).find(
+        (c) => c.getName() === currentPage.getName()
+      )
+    ) {
+      h1.addEventListener('dblclick', (event) => {
+        h1.setAttribute('contenteditable', 'true');
+      });
+
+      h1.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.repeat) {
+          event.preventDefault();
+          h1.blur();
+        }
+      });
+
+      h1.addEventListener('blur', (event) => {
+        h1.setAttribute('contenteditable', 'false');
+
+        const newName = h1.innerText;
+        const oldName = currentPage.getName();
+
+        if (oldName !== newName) {
+          currentPage.getButton().textContent =
+            currentPage.getIcon() + ' ' + h1.innerText;
+
+          userCategories[newName] = userCategories[oldName];
+          delete userCategories[oldName];
+
+          userCategories[newName].setName(newName);
+          userCategories[newName].setDisplayName(newName);
+
+          arrays[newName] = arrays[oldName];
+          delete arrays[oldName];
+
+          userCategories[newName].setContents(arrays[newName]);
+
+          userCategories[newName]
+            .getContents()
+            .forEach((c) => c.setParent(newName));
+
+          // GET BACK HERE
+          removeObjectFromLocalStorage(oldName);
+          saveObjectToLocalStorage(newName, userCategories[newName]);
+        }
+      });
+    }
     h1.classList.add('sectionTitle');
 
     todos.appendChild(h1);

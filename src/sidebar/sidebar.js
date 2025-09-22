@@ -23,12 +23,28 @@ export class SidebarCategory {
     return this.name;
   }
 
+  getIcon() {
+    return this.icon;
+  }
+
   getDisplayName() {
     return this.displayName;
   }
 
+  setName(name) {
+    this.name = name;
+  }
+
+  setDisplayName(name) {
+    this.displayName = name;
+  }
+
   getContents() {
     return this.contents;
+  }
+
+  setContents(contents) {
+    this.contents = contents;
   }
 
   getButton() {

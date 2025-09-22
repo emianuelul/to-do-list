@@ -25,6 +25,7 @@ button {
   display: flex;
 
   flex-direction: column;
+  align-items: center;
 
   gap: 16px;
   width: 100%;
@@ -33,11 +34,6 @@ button {
   flex: 6;
 
   padding: 2em 2em 2em 1em;
-}
-
-.todo,
-.todoform {
-  align-self: self-start;
 }
 
 .todo {
@@ -55,7 +51,7 @@ button {
   gap: 16px;
 
   flex: 1;
-  transition: 0.1s;
+  transition: 0.2s;
 }
 
 .todo > input {
@@ -124,6 +120,7 @@ button {
 
 .todo.clicked {
   background: rgba(128, 128, 128, 0.25);
+  flex: 2;
 }
 
 .todo.clicked > .todoDesc {
