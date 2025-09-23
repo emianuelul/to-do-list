@@ -50,14 +50,6 @@ const processor = (function () {
 
   let userCategories = {};
 
-  const currentDay = new Date();
-  const checkDueTmrw = (item) => {
-    const date = parse(item.getDate(), 'dd/MM/yyyy', currentDay);
-    if (differenceInCalendarDays(date, currentDay) === 1) {
-      arrays['Due Tomorrow'].push(item);
-    }
-  };
-
   const content = document.querySelector('#content');
 
   const sideBar = DomStuff.makeDiv('#sidebar');
@@ -65,6 +57,38 @@ const processor = (function () {
 
   const todos = DomStuff.makeDiv('.todos');
   content.appendChild(todos);
+
+  const nightModeBtn = DomStuff.makeButton('🌙');
+  nightModeBtn.id = 'themeToggle';
+  nightModeBtn.addEventListener('click', (event) => {
+    if (document.querySelector('body').getAttribute('data-theme') === 'dark') {
+      document.querySelector('body').setAttribute('data-theme', 'light');
+    } else {
+      document.querySelector('body').setAttribute('data-theme', 'dark');
+    }
+  });
+  content.appendChild(nightModeBtn);
+
+  const footer = document.createElement('footer');
+  footer.innerHTML =
+    'Project done by <a href="https://github.com/emianuelul">Emanuel Marin</a>.';
+  content.appendChild(footer);
+
+  footer.addEventListener('mouseenter', (event) => {
+    footer.style.opacity = 1;
+  });
+
+  footer.addEventListener('mouseleave', (event) => {
+    footer.style.opacity = 0;
+  });
+
+  const currentDay = new Date();
+  const checkDueTmrw = (item) => {
+    const date = parse(item.getDate(), 'dd/MM/yyyy', currentDay);
+    if (differenceInCalendarDays(date, currentDay) === 1) {
+      arrays['Due Tomorrow'].push(item);
+    }
+  };
 
   const saveObjectToLocalStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
@@ -97,6 +121,9 @@ const processor = (function () {
           );
 
           makeEditable(toDoObj.todo.querySelector('.todoText'), () => {
+            toDoObj.todo.querySelector('.todoText').innerText = toDoObj.todo
+              .querySelector('.todoText')
+              .innerText.trim();
             const newName = toDoObj.todo.querySelector('.todoText').innerText;
             const oldName = parsedObj.contents[i].getText();
 
@@ -111,6 +138,29 @@ const processor = (function () {
               );
             }
           });
+
+          if (toDoObj.todo.querySelector('.todoDesc')) {
+            makeEditable(toDoObj.todo.querySelector('.todoDesc'), () => {
+              toDoObj.todo.querySelector('.todoDesc').innerText = toDoObj.todo
+                .querySelector('.todoDesc')
+                .innerText.trim();
+              const newName = toDoObj.todo
+                .querySelector('.todoDesc')
+                .innerText.trim();
+              const oldName = parsedObj.contents[i].getDesc().trim();
+
+              if (oldName !== newName) {
+                parsedObj.contents[i].setDesc(newName);
+
+                saveObjectToLocalStorage(
+                  parsedObj.contents[i].getParent().trim(),
+                  Object.values(userCategories).find(
+                    (c) => c.getName() === parsedObj.contents[i].getParent()
+                  )
+                );
+              }
+            });
+          }
 
           arrays["All To-Do's"].push(parsedObj.contents[i]);
           arrays["Uncompleted To-Do's"].push(parsedObj.contents[i]);
@@ -133,6 +183,7 @@ const processor = (function () {
             toDoObj.todo
               .querySelector('.todoFavorite')
               .classList.add('visible');
+            toDoObj.todo.classList.toggle('favorited');
             arrays.Favorites.push(parsedObj.contents[i]);
           }
 
@@ -174,7 +225,7 @@ const processor = (function () {
         event.preventDefault();
 
         const data = new FormData(form);
-        const formText = data.get('textInput');
+        const formText = data.get('textInput').trim();
         const formDate = format(new Date(data.get('dateInput')), 'dd/MM/yyyy');
         const formDesc = data.get('descInput');
 
@@ -190,20 +241,46 @@ const processor = (function () {
         );
 
         makeEditable(toDoObj.todo.querySelector('.todoText'), () => {
+          toDoObj.todo.querySelector('.todoText').innerText = toDoObj.todo
+            .querySelector('.todoText')
+            .innerText.trim();
           const newName = toDoObj.todo.querySelector('.todoText').innerText;
-          const oldName = toDoClass.getText();
+          const oldName = toDoClass.getText().trim();
 
           if (oldName !== newName) {
             toDoClass.setText(newName);
 
             saveObjectToLocalStorage(
-              toDoClass.getParent(),
+              toDoClass.getParent().trim(),
               Object.values(userCategories).find(
                 (c) => c.getName() === toDoClass.getParent()
               )
             );
           }
         });
+
+        if (toDoObj.todo.querySelector('.todoDesc')) {
+          makeEditable(toDoObj.todo.querySelector('.todoDesc'), () => {
+            toDoObj.todo.querySelector('.todoDesc').innerText = toDoObj.todo
+              .querySelector('.todoDesc')
+              .innerText.trim();
+            const newName = toDoObj.todo
+              .querySelector('.todoDesc')
+              .innerText.trim();
+            const oldName = toDoClass.getDesc();
+
+            if (oldName !== newName) {
+              toDoClass.setDesc(newName);
+
+              saveObjectToLocalStorage(
+                toDoClass.getParent().trim(),
+                Object.values(userCategories).find(
+                  (c) => c.getName() === toDoClass.getParent()
+                )
+              );
+            }
+          });
+        }
 
         toDoObj.todo.querySelector('.parentText ').textContent =
           toDoClass.getParent();
@@ -364,6 +441,8 @@ const processor = (function () {
         )
       );
     } else if (event.target.classList.contains('todoFavorite')) {
+      toDoObj.todo.classList.toggle('favorited');
+
       if (favoriteBtn.classList.contains('visible')) {
         toDoItem.toggleFavorite();
         favoriteBtn.classList.remove('visible');
@@ -457,16 +536,22 @@ const processor = (function () {
       )
     ) {
       makeEditable(h1, () => {
+        h1.innerText = h1.innerText.trim();
         const newName = h1.innerText;
         const oldName = currentPage.getName();
 
-        if (checkExistingCategory(newName)) {
+        if (Object.values(userCategories).find((c) => c.getName() === name)) {
+          return;
+        } else if (
+          Object.values(initCategories).find((c) => c.getName() === name)
+        ) {
           return;
         }
 
         if (oldName !== newName) {
-          currentPage.getButton().textContent =
-            currentPage.getIcon() + ' ' + newName;
+          currentPage.getButton().textContent = String(
+            currentPage.getIcon() + ' ' + newName
+          ).trim();
 
           currentPage.getButton().setAttribute('buttonname', newName);
 

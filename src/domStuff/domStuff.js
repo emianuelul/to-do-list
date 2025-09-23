@@ -19,6 +19,14 @@ export class ToDoItem {
     this.text = text;
   }
 
+  getDesc() {
+    return this.desc;
+  }
+
+  setDesc(desc) {
+    this.desc = desc;
+  }
+
   getDate() {
     return this.date;
   }
@@ -116,7 +124,7 @@ export class DomStuff {
 
   static createPageTitle(titleText) {
     const container = DomStuff.makeDiv('.titleContainer');
-    const title = DomStuff.makeH(1, titleText);
+    const title = DomStuff.makeH(1, titleText.trim());
     title.classList.add('sectionTitle');
     const deleteButton = DomStuff.makeButton('🗑️');
     deleteButton.classList.add('sectionDelete');
@@ -136,7 +144,7 @@ export class DomStuff {
 
     const dateInput = DomStuff.makeInput('text', true);
     dateInput.name = 'dateInput';
-    dateInput.placeholder = 'dd/mm/yyyy';
+    dateInput.placeholder = 'Due Date...';
     dateInput.setAttribute('onfocus', '(this.type="date")');
     dateInput.setAttribute('onblur', '(this.type="text")');
     dateInput.classList.add('dateInput');
@@ -165,10 +173,10 @@ export class DomStuff {
     const checkBox = DomStuff.makeCheckbox(`${DomStuff.#labels}`);
     checkBox.classList.add('todoCheck');
 
-    const label = DomStuff.makeP(text);
+    const label = DomStuff.makeP(text.trim());
     label.classList.add('todoText');
 
-    const dateLabel = DomStuff.makeP(date);
+    const dateLabel = DomStuff.makeP(date.trim());
     dateLabel.classList.add('todoDate');
     DomStuff.#labels++;
 
@@ -181,7 +189,7 @@ export class DomStuff {
     const deleteBtn = DomStuff.makeButton('🗑️');
     deleteBtn.classList.add('todoDelete');
 
-    const description = DomStuff.makeP(desc);
+    const description = DomStuff.makeP(desc.trim());
     description.classList.add('todoDesc');
 
     todo.append(

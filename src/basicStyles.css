@@ -1,3 +1,108 @@
+:root {
+  --bgColor: white;
+  --textColor: rgb(30, 30, 30);
+  --strokeColor: rgb(23, 23, 23);
+
+  --todosBg: white;
+
+  --buttonBg: #e4e4e4;
+  --buttonBgHover: #d3d2d2;
+  --buttonBgClicked: #c7c7c7;
+
+  --themeBtnBg: rgb(25, 26, 28);
+
+  --todoButtonBg: white;
+  --favoritedHighlight: rgba(250, 235, 135, 0.7);
+  --deleteHighlight: rgba(250, 141, 135, 0.5);
+
+  --formBg: white;
+  --formInputBg: white;
+
+  --footerBg: rgba(25, 26, 28, 0.75);
+  --footerText: rgb(226, 229, 216);
+
+  --boxShadow: rgb(23, 23, 23, 0.4);
+}
+
+[data-theme='dark'] {
+  --bgColor: #202125;
+  --textColor: rgb(216, 226, 229);
+  --strokeColor: rgba(216, 220, 229, 0.5);
+
+  --todosBg: #272b34;
+
+  --buttonBg: #373d41;
+  --buttonBgHover: #53575c;
+  --buttonBgClicked: #4f565a;
+
+  --themeBtnBg: white;
+
+  --todoButtonBg: #292d30;
+  --favoritedHighlight: rgba(135, 250, 189, 0.2);
+  --deleteHighlight: rgba(255, 92, 84, 0.3);
+
+  --formBg: rgb(74, 76, 87);
+  --formInputBg: rgb(114, 115, 117);
+
+  --footerBg: rgba(255, 255, 255, 0.5);
+  --footerText: rgb(30, 30, 30);
+
+  --boxShadow: rgba(216, 220, 229, 0.15);
+
+  transition: 0.25s;
+}
+
+button,
+label,
+h1,
+p {
+  color: var(--textColor);
+  transition: 0.25s;
+}
+
+button {
+  border: 2px solid var(--strokeColor);
+  background-color: var(--buttonBg);
+  border: 0;
+}
+
+.todo > button {
+  justify-self: center;
+
+  font-size: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 50%;
+}
+
+input[type='text'] {
+  outline: none;
+}
+
+body {
+  background-color: var(--todosBg);
+}
+
+#themeToggle {
+  position: absolute;
+  bottom: 3%;
+  right: 1.5%;
+
+  font-size: 2rem;
+
+  padding: 8px 13px;
+
+  border-radius: 50%;
+  border: 0;
+
+  background: var(--themeBtnBg);
+
+  transition: 0.25s;
+}
+
+#themeToggle:hover {
+  transform: scale(1.1);
+}
+
 #content {
   display: flex;
   min-height: 100vh;
@@ -13,16 +118,34 @@ button {
   user-select: none;
 }
 
+.todo:has(.todoDelete:hover) {
+  background-color: var(--deleteHighlight);
+}
+
 .titleContainer {
   display: flex;
   justify-content: center;
   align-items: center;
 
+  padding: 0px 16px;
+  border-radius: 8px;
+
   width: 100%;
+  transition: 0.25s;
 }
 
 .titleContainer > .sectionTitle {
   margin-right: auto;
+}
+
+.titleContainer > button {
+  border-radius: 8px;
+  font-size: 1.5rem;
+  background-color: var(--buttonBg);
+}
+
+.todos:has(.titleContainer button:hover) > * {
+  background-color: var(--deleteHighlight);
 }
 
 .sectionTitle {
@@ -42,10 +165,26 @@ button {
   gap: 16px;
   width: 100%;
   height: 100%;
+  max-height: calc(100vh - 2em);
 
   flex: 6;
 
   padding: 2em 2em 2em 1em;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.todos::-webkit-scrollbar {
+  width: 8px;
+  padding: 12px;
+  margin-right: 25px;
+}
+
+.todos::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+  opacity: 0.7;
 }
 
 .todo {
@@ -62,8 +201,39 @@ button {
   border-radius: 12px;
   gap: 16px;
 
-  flex: 1;
+  flex-grow: 1;
   transition: 0.2s;
+}
+
+.todos .addToDo {
+  font-size: 2rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50%;
+
+  background-color: var(--buttonBg);
+}
+
+.todos .addToDo:hover {
+  background-color: var(--buttonBgHover);
+}
+
+.todos > .titleContainer {
+  position: relative;
+}
+
+.todos > .titleContainer::after {
+  position: absolute;
+  content: '';
+
+  width: 100%;
+  bottom: -4px;
+  right: 0;
+  border: 2px solid var(--strokeColor);
+  border-radius: 8px;
+}
+
+.todo.favorited {
+  background-color: var(--favoritedHighlight);
 }
 
 .todo > input {
@@ -74,8 +244,9 @@ button {
   justify-self: center;
 }
 
-.todo > button {
-  border-radius: 12px;
+.todo button {
+  color: var(--textColor);
+  background-color: var(--todoButtonBg);
 }
 
 .todo > .todoText,
@@ -85,8 +256,23 @@ button {
   text-align: center;
 }
 
+form > input {
+  padding: 4px 8px;
+  border: 2px solid var(--strokeColor);
+  border-radius: 8px;
+}
+
+form {
+  background-color: var(--formBg);
+}
+
+form > button {
+  border-radius: 8px;
+}
+
 .todoform {
-  border: 2px solid black;
+  border: 3px solid var(--strokeColor);
+  border-radius: 8px;
 
   max-width: max-content;
 
@@ -126,7 +312,7 @@ button {
   display: none;
 
   font-size: 1.25rem;
-  color: rgba(0, 0, 0, 0.5);
+  color: var(--textColor);
 
   grid-column: 1/7;
   justify-self: center;
@@ -143,4 +329,21 @@ button {
 
 .todo:hover {
   background: rgba(128, 128, 128, 0.25);
+}
+
+footer {
+  position: fixed;
+  width: 100vw;
+  bottom: 0;
+
+  text-align: center;
+  background-color: var(--footerBg);
+  color: var(--footerText);
+
+  opacity: 0;
+  transition: 0.25s;
+}
+
+footer > a {
+  color: var(--footerText);
 }
