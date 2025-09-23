@@ -79,7 +79,7 @@ const processor = (function () {
       if (localStorage.hasOwnProperty(key)) {
         let parsedObj = JSON.parse(localStorage[key]);
         for (let i = 0; i < parsedObj.contents.length; i++) {
-          const currObj = parsedObj.contents[i]; // to get the properties easier
+          const currObj = parsedObj.contents[i];
           const toDoObj = DomStuff.createToDoItem(
             currObj.text,
             currObj.date,
@@ -95,6 +95,22 @@ const processor = (function () {
             currObj.parent,
             currObj.desc
           );
+
+          makeEditable(toDoObj.todo.querySelector('.todoText'), () => {
+            const newName = toDoObj.todo.querySelector('.todoText').innerText;
+            const oldName = parsedObj.contents[i].getText();
+
+            if (oldName !== newName) {
+              parsedObj.contents[i].setText(newName);
+
+              saveObjectToLocalStorage(
+                parsedObj.contents[i].getParent(),
+                Object.values(userCategories).find(
+                  (c) => c.getName() === parsedObj.contents[i].getParent()
+                )
+              );
+            }
+          });
 
           arrays["All To-Do's"].push(parsedObj.contents[i]);
           arrays["Uncompleted To-Do's"].push(parsedObj.contents[i]);
@@ -172,6 +188,22 @@ const processor = (function () {
           currentPage.getName(),
           formDesc
         );
+
+        makeEditable(toDoObj.todo.querySelector('.todoText'), () => {
+          const newName = toDoObj.todo.querySelector('.todoText').innerText;
+          const oldName = toDoClass.getText();
+
+          if (oldName !== newName) {
+            toDoClass.setText(newName);
+
+            saveObjectToLocalStorage(
+              toDoClass.getParent(),
+              Object.values(userCategories).find(
+                (c) => c.getName() === toDoClass.getParent()
+              )
+            );
+          }
+        });
 
         toDoObj.todo.querySelector('.parentText ').textContent =
           toDoClass.getParent();
@@ -523,10 +555,6 @@ const processor = (function () {
       const clickedCategory =
         getClickedCategory(userCategories, btn) ||
         getClickedCategory(initCategories, btn);
-
-      console.log(userCategories, btn);
-      console.log(initCategories, btn);
-
       if (clickedCategory) {
         changePage(clickedCategory);
       }
