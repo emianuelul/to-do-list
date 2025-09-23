@@ -60,12 +60,18 @@ const processor = (function () {
 
   const nightModeBtn = DomStuff.makeButton('🌙');
   nightModeBtn.id = 'themeToggle';
-  nightModeBtn.addEventListener('click', (event) => {
+  document.querySelector('body').setAttribute('data-theme', 'light');
+  nightModeBtn.addEventListener('click', () => {
     if (document.querySelector('body').getAttribute('data-theme') === 'dark') {
       document.querySelector('body').setAttribute('data-theme', 'light');
     } else {
       document.querySelector('body').setAttribute('data-theme', 'dark');
     }
+
+    saveObjectToLocalStorage(
+      'data-theme',
+      document.querySelector('body').getAttribute('data-theme')
+    );
   });
   content.appendChild(nightModeBtn);
 
@@ -74,11 +80,11 @@ const processor = (function () {
     'Project done by <a href="https://github.com/emianuelul">Emanuel Marin</a>.';
   content.appendChild(footer);
 
-  footer.addEventListener('mouseenter', (event) => {
+  footer.addEventListener('mouseenter', () => {
     footer.style.opacity = 1;
   });
 
-  footer.addEventListener('mouseleave', (event) => {
+  footer.addEventListener('mouseleave', () => {
     footer.style.opacity = 0;
   });
 
@@ -99,8 +105,14 @@ const processor = (function () {
   };
 
   const buildFromStorage = () => {
+    if (JSON.parse(localStorage.getItem('data-theme')) === 'dark') {
+      document.querySelector('body').setAttribute('data-theme', 'dark');
+    } else {
+      document.querySelector('body').setAttribute('data-theme', 'light');
+    }
     for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (localStorage.hasOwnProperty(key) && key !== 'data-theme') {
+        console.log(JSON.parse(localStorage[key]));
         let parsedObj = JSON.parse(localStorage[key]);
         for (let i = 0; i < parsedObj.contents.length; i++) {
           const currObj = parsedObj.contents[i];
