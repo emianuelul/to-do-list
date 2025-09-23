@@ -139,7 +139,11 @@ const processor = (function () {
             const newName = toDoObj.todo.querySelector('.todoText').innerText;
             const oldName = parsedObj.contents[i].getText();
 
-            if (oldName !== newName) {
+            if (toDoObj.todo.querySelector('.todoText').innerText === '') {
+              toDoObj.todo.querySelector('.todoText').innerText = oldName;
+            }
+
+            if (oldName !== newName && newName) {
               parsedObj.contents[i].setText(newName);
 
               saveObjectToLocalStorage(
@@ -160,8 +164,10 @@ const processor = (function () {
                 .querySelector('.todoDesc')
                 .innerText.trim();
               const oldName = parsedObj.contents[i].getDesc().trim();
-
-              if (oldName !== newName) {
+              if (toDoObj.todo.querySelector('.todoDesc').innerText === '') {
+                toDoObj.todo.querySelector('.todoDesc').innerText = oldName;
+              }
+              if (oldName !== newName && newName) {
                 parsedObj.contents[i].setDesc(newName);
 
                 saveObjectToLocalStorage(
@@ -258,8 +264,10 @@ const processor = (function () {
             .innerText.trim();
           const newName = toDoObj.todo.querySelector('.todoText').innerText;
           const oldName = toDoClass.getText().trim();
-
-          if (oldName !== newName) {
+          if (toDoObj.todo.querySelector('.todoText').innerText === '') {
+            toDoObj.todo.querySelector('.todoText').innerText = oldName;
+          }
+          if (oldName !== newName && newName) {
             toDoClass.setText(newName);
 
             saveObjectToLocalStorage(
@@ -281,7 +289,11 @@ const processor = (function () {
               .innerText.trim();
             const oldName = toDoClass.getDesc();
 
-            if (oldName !== newName) {
+            if (toDoObj.todo.querySelector('.todoDesc').innerText === '') {
+              toDoObj.todo.querySelector('.todoDesc').innerText = oldName;
+            }
+
+            if (oldName !== newName && newName) {
               toDoClass.setDesc(newName);
 
               saveObjectToLocalStorage(
@@ -552,6 +564,10 @@ const processor = (function () {
         const newName = h1.innerText;
         const oldName = currentPage.getName();
 
+        if (h1.innerText === '') {
+          h1.innerText = oldName;
+        }
+
         if (Object.values(userCategories).find((c) => c.getName() === name)) {
           return;
         } else if (
@@ -560,7 +576,7 @@ const processor = (function () {
           return;
         }
 
-        if (oldName !== newName) {
+        if (oldName !== newName && newName) {
           currentPage.getButton().textContent = String(
             currentPage.getIcon() + ' ' + newName
           ).trim();
