@@ -139,6 +139,7 @@ export class DomStuff {
     dateInput.placeholder = 'dd/mm/yyyy';
     dateInput.setAttribute('onfocus', '(this.type="date")');
     dateInput.setAttribute('onblur', '(this.type="text")');
+    dateInput.classList.add('dateInput');
 
     const submitButton = DomStuff.makeButton('Submit');
     submitButton.type = 'submit';

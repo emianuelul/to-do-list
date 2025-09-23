@@ -146,7 +146,6 @@ const processor = (function () {
     btn.classList.add('addToDo');
     btn.addEventListener('click', (event) => {
       const form = DomStuff.createToDoForm();
-
       todos.insertBefore(form, btn);
 
       form.addEventListener('click', (event) => {
@@ -437,6 +436,8 @@ const processor = (function () {
           currentPage.getButton().textContent =
             currentPage.getIcon() + ' ' + newName;
 
+          currentPage.getButton().setAttribute('buttonname', newName);
+
           userCategories[newName] = userCategories[oldName];
           delete userCategories[oldName];
 
@@ -522,6 +523,9 @@ const processor = (function () {
       const clickedCategory =
         getClickedCategory(userCategories, btn) ||
         getClickedCategory(initCategories, btn);
+
+      console.log(userCategories, btn);
+      console.log(initCategories, btn);
 
       if (clickedCategory) {
         changePage(clickedCategory);
